@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import ReceiptsPage from "@/pages/receipts";
 import ProductsPage from "@/pages/products";
 import ScannerPage from "@/pages/scanner";
+import ProductManagementPage from "@/pages/product-management";
 
 function Router() {
   return (
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/receipts" component={ReceiptsPage} />
       <Route path="/products" component={ProductsPage} />
       <Route path="/scanner" component={ScannerPage} />
+      <Route path="/product-management" component={ProductManagementPage} />
       <Route component={NotFound} />
     </Switch>
   );

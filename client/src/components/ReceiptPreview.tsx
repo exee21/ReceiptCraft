@@ -49,7 +49,7 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
       <CardContent className="flex-grow overflow-auto flex justify-center">
         <div 
           ref={receiptRef}
-          className="bg-white border border-gray-200 p-4 max-w-sm font-mono text-xs whitespace-pre-wrap leading-tight"
+          className="bg-gradient-to-br from-orange-50 to-gray-100 border border-gray-200 p-4 max-w-sm font-mono text-xs whitespace-pre-wrap leading-tight text-black"
           style={{ width: '320px', fontFamily: 'Courier, monospace' }}
         >
           <div className="text-center mb-2">
@@ -66,10 +66,10 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
           <div className="mb-3">
             {items.map((item, index) => (
               <div key={index} className="mb-1">
-                <div className="flex-none" style={{ fontFamily: 'Courier, monospace' }}>
+                <div className="flex-none" style={{ fontFamily: 'Courier, monospace', color: '#000000' }}>
                   {formatItemLine(item)}
                 </div>
-                <div className="ml-2" style={{ fontFamily: 'Courier, monospace' }}>
+                <div className="ml-2" style={{ fontFamily: 'Courier, monospace', color: '#000000' }}>
                   {item.sku}
                 </div>
               </div>
