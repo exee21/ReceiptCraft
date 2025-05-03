@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -28,7 +28,7 @@ export default function ScannerPage() {
   const [scannerInitialized, setScannerInitialized] = useState(false);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const toast = useToast();
-  const navigate = useNavigate();
+  const [_, setLocation] = useLocation();
 
   // Initialize the scanner when the component mounts
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function ScannerPage() {
     if (foundProduct) {
       // Use sessionStorage to pass the product to the home page
       sessionStorage.setItem('scannedProduct', JSON.stringify(foundProduct));
-      navigate('/');
+      setLocation('/');
       
       toast.toast({
         title: "Product Added",
@@ -218,7 +218,7 @@ export default function ScannerPage() {
         </CardContent>
         
         <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/')}>
+          <Button variant="outline" onClick={() => setLocation('/')}>
             Back to Receipt
           </Button>
           

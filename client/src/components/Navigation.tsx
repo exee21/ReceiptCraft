@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Receipt, Search } from 'lucide-react';
+import { Receipt, Search, QrCode } from 'lucide-react';
 
 export default function Navigation() {
   const [location] = useLocation();
