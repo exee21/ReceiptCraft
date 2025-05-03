@@ -50,17 +50,11 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
         <div 
           ref={receiptRef}
           className="bg-gradient-to-br from-orange-50 to-gray-100 border border-gray-200 p-4 text-xs whitespace-pre-wrap leading-tight text-black receipt-font"
-          style={{ width: '380px', maxWidth: '100%' }}
+          style={{ width: '300px', maxWidth: '100%', margin: '0 auto' }}
         >
           <div className="text-center mb-2">
             <div className="mb-1 flex justify-center">
-              <div className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'Arial, sans-serif' }}>CVS/pharmacy</div>
-            </div>
-            <div className="text-xs">
-              2015 Fayetteville Rd, VAN BUREN, AR 72956
-            </div>
-            <div className="text-xs">
-              (479)471-1608
+              <img src={cvsLogo} alt="CVS/pharmacy" style={{ width: '220px', height: 'auto' }} className="mb-1" />
             </div>
           </div>
           
@@ -125,9 +119,9 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
             <div className="mx-auto mb-1 flex justify-center">
               <Barcode
                 value={`${receiptInfo.randomNumbers[0]} ${receiptInfo.randomNumbers[1]} ${receiptInfo.randomNumbers[2]} ${receiptInfo.randomNumbers[3]}`}
-                width={1}
+                width={0.8}
                 height={40}
-                fontSize={8}
+                fontSize={7}
                 margin={0}
                 displayValue={true}
                 fontOptions="bold"

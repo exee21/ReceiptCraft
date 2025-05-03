@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import ReceiptForm from '@/components/ReceiptForm';
 import ReceiptPreview from '@/components/ReceiptPreview';
 import ItemsTable from '@/components/ItemsTable';
+import ReceiptCustomization, { TemplateOptions } from '@/components/ReceiptCustomization';
 import { ReceiptItem, ReceiptInfo, Receipt, InsertReceipt } from '@/types';
 import { generateReceiptInfo, getFormattedDateTime, generatePrintHTML } from '@/lib/receiptUtils';
 import { format, parse } from 'date-fns';
@@ -17,6 +18,16 @@ const Home = () => {
   const [receiptInfo, setReceiptInfo] = useState<ReceiptInfo>(generateReceiptInfo());
   const [dateInput, setDateInput] = useState(getFormattedDateTime().date);
   const [timeInput, setTimeInput] = useState(getFormattedDateTime().time);
+  const [templateOptions, setTemplateOptions] = useState<TemplateOptions>({
+    storeAddress: '2015 Fayetteville Rd, VAN BUREN, AR 72956',
+    storePhone: '(479)471-1608',
+    storeName: 'CVS/pharmacy',
+    showBarcodeAtBottom: true,
+    footerText: 'RETURNS WITH RECEIPT THRU 6/29/2025',
+    paperColor: 'default',
+    textColor: 'black',
+    returnDays: 60
+  });
   const receiptRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -240,6 +251,57 @@ const Home = () => {
     const receiptHTML = receiptRef.current.innerHTML;
     printWindow.document.write(generatePrintHTML(receiptHTML));
     printWindow.document.close();
+  };
+  
+  const handleTemplateChange = (newOptions: TemplateOptions) => {
+    setTemplateOptions(newOptions);
+    
+    // Apply relevant template options to the receipt
+    if (newOptions.footerText) {
+      // Update footer text for returns policy
+      document.documentElement.style.setProperty('--receipt-footer-text', newOptions.footerText);
+    }
+    
+    // Apply paper color
+    let bgColor = 'from-orange-50 to-gray-100';
+    if (newOptions.paperColor === 'white') {
+      bgColor = 'bg-white';
+    } else if (newOptions.paperColor === 'cream') {
+      bgColor = 'from-yellow-50 to-orange-50';
+    } else if (newOptions.paperColor === 'light-yellow') {
+      bgColor = 'from-yellow-50 to-yellow-100';
+    }
+    
+    // Update text color
+    let textColor = 'text-black';
+    if (newOptions.textColor === 'dark-gray') {
+      textColor = 'text-gray-800';
+    } else if (newOptions.textColor === 'blue') {
+      textColor = 'text-blue-950';
+    }
+    
+    document.documentElement.style.setProperty('--receipt-bg-color', bgColor);
+    document.documentElement.style.setProperty('--receipt-text-color', textColor);
+  };
+  
+  const resetTemplateOptions = () => {
+    const defaultOptions: TemplateOptions = {
+      storeAddress: '2015 Fayetteville Rd, VAN BUREN, AR 72956',
+      storePhone: '(479)471-1608',
+      storeName: 'CVS/pharmacy',
+      showBarcodeAtBottom: true,
+      footerText: 'RETURNS WITH RECEIPT THRU 6/29/2025',
+      paperColor: 'default',
+      textColor: 'black',
+      returnDays: 60
+    };
+    
+    setTemplateOptions(defaultOptions);
+    
+    toast({
+      title: "Template Reset",
+      description: "Receipt template has been reset to default settings",
+    });
   };
 
   return (
