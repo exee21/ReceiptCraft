@@ -2,10 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import ReceiptForm from '@/components/ReceiptForm';
 import ReceiptPreview from '@/components/ReceiptPreview';
 import ItemsTable from '@/components/ItemsTable';
-import { ReceiptItem, ReceiptInfo } from '@/types';
+import { ReceiptItem, ReceiptInfo, Receipt, InsertReceipt } from '@/types';
 import { generateReceiptInfo, getFormattedDateTime, generatePrintHTML } from '@/lib/receiptUtils';
 import { format, parse } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Button } from '@/components/ui/button';
+import { Link } from 'wouter';
 
 const Home = () => {
   const [items, setItems] = useState<ReceiptItem[]>([]);
@@ -88,6 +92,79 @@ const Home = () => {
     });
   };
 
+  const queryClient = useQueryClient();
+
+  // Mutation for saving the receipt to the database
+  const saveReceiptMutation = useMutation({
+    mutationFn: async () => {
+      // First save the receipt
+      const receiptData: InsertReceipt = {
+        date: receiptInfo.date,
+        time: receiptInfo.time,
+        taxRate: taxRate,
+        regNumber: receiptInfo.regNumber,
+        transNumber: receiptInfo.transNumber,
+        helperName: receiptInfo.helperName,
+        cashierNumber: receiptInfo.cashierNumber,
+        storeNumber: receiptInfo.storeNumber,
+        cardLastFour: receiptInfo.cardLastFour,
+        authCode: receiptInfo.authCode,
+        aidCode: receiptInfo.aidCode,
+        randomNumbers: receiptInfo.randomNumbers,
+      };
+
+      const response = await apiRequest(
+        'POST',
+        '/api/receipts',
+        receiptData
+      );
+      const savedReceipt: Receipt = await response.json();
+
+      // Then save each item with the receipt ID
+      for (const item of items) {
+        await apiRequest(
+          'POST',
+          '/api/receipt-items',
+          {
+            name: item.name,
+            price: item.price,
+            sku: item.sku,
+            receiptId: savedReceipt.id,
+          }
+        );
+      }
+
+      return savedReceipt;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/receipts'] });
+      toast({
+        title: "Receipt Saved",
+        description: "Your receipt has been saved to the database",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to save the receipt",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const saveReceipt = () => {
+    if (items.length === 0) {
+      toast({
+        title: "Cannot Save",
+        description: "Please add at least one item before saving",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveReceiptMutation.mutate();
+  };
+
   const printReceipt = () => {
     if (items.length === 0) {
       toast({
@@ -160,6 +237,22 @@ const Home = () => {
           onEditItem={editItem}
           onDeleteItem={deleteItem}
         />
+      </div>
+      
+      <div className="mt-6 flex justify-between">
+        <Button
+          className="bg-red-600 hover:bg-red-700 text-white"
+          onClick={saveReceipt}
+          disabled={saveReceiptMutation.isPending}
+        >
+          {saveReceiptMutation.isPending ? "Saving..." : "Save Receipt"}
+        </Button>
+        
+        <Link href="/receipts">
+          <Button variant="outline" className="border-red-600 text-red-600 hover:bg-red-50">
+            View Saved Receipts
+          </Button>
+        </Link>
       </div>
     </div>
   );

@@ -6,6 +6,37 @@ export interface ReceiptItem {
   receiptId?: number;
 }
 
+export interface Receipt {
+  id: number;
+  date: string;
+  time: string;
+  taxRate: number;
+  regNumber: string;
+  transNumber: string;
+  helperName: string;
+  cashierNumber: string;
+  storeNumber: string;
+  cardLastFour: string;
+  authCode: string;
+  aidCode: string;
+  randomNumbers: string[];
+}
+
+export interface InsertReceipt {
+  date: string;
+  time: string;
+  taxRate: number;
+  regNumber: string;
+  transNumber: string;
+  helperName: string;
+  cashierNumber: string;
+  storeNumber: string;
+  cardLastFour: string;
+  authCode: string;
+  aidCode: string;
+  randomNumbers: string[];
+}
+
 export interface ReceiptDetails {
   id?: number;
   date: string;
