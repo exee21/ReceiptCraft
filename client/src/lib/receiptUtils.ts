@@ -118,7 +118,7 @@ export const generatePrintHTML = (receiptHTML: string): string => {
             padding: 0;
             background-color: white;
           }
-          img { max-width: 100%; }
+          img { max-width: 100%; height: auto; }
           .center { text-align: center; }
           .divider { border-top: 1px solid #ddd; margin: 8px 0; }
           .flex { display: flex; justify-content: space-between; }
@@ -132,7 +132,30 @@ export const generatePrintHTML = (receiptHTML: string): string => {
           ${receiptHTML}
         </div>
         <script>
-          window.onload = function() { window.print(); }
+          // Ensure images are loaded before printing
+          let imagesLoaded = false;
+          const images = document.querySelectorAll('img');
+          let loadedImages = 0;
+          
+          function checkAllImagesLoaded() {
+            loadedImages++;
+            if (loadedImages === images.length) {
+              window.print();
+            }
+          }
+          
+          if (images.length > 0) {
+            images.forEach(img => {
+              if (img.complete) {
+                checkAllImagesLoaded();
+              } else {
+                img.addEventListener('load', checkAllImagesLoaded);
+                img.addEventListener('error', checkAllImagesLoaded);
+              }
+            });
+          } else {
+            window.print();
+          }
         </script>
       </body>
     </html>

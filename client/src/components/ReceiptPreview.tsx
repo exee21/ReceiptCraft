@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { ReceiptItem, ReceiptInfo } from '@/types';
 import { formatCurrency } from '@/lib/receiptUtils';
 import Barcode from 'react-barcode';
+import cvsLogo from '@/assets/logo_cvs_384w.png';
 
 interface ReceiptPreviewProps {
   items: ReceiptItem[];
@@ -51,9 +52,9 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
           style={{ width: '320px', fontFamily: 'Courier, monospace' }}
         >
           <div className="text-center mb-2">
-            <div className="text-base font-bold mb-1">CVS/pharmacy®</div>
-            <div>2015 Fayetteville Rd, VAN BUREN, AR 72956</div>
-            <div className="mb-2">(479)471-1608</div>
+            <div className="mb-1 flex justify-center">
+              <img src={cvsLogo} alt="CVS/pharmacy" style={{ width: '250px', height: 'auto' }} />
+            </div>
           </div>
           
           <div className="mb-3">
