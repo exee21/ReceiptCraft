@@ -1,17 +1,23 @@
 ReceiptCraft
-ReceiptCraft is a tool designed to simplify the management, generation, and analysis of receipt data for retail products. It leverages a structured product database (e.g., cvs-products-2025-05-03.json) to store and process details such as product names, SKUs, prices, and descriptions. Whether you're tracking purchases, generating mock receipts, or analyzing shopping data, ReceiptCraft provides a flexible and user-friendly solution.
+ReceiptCraft is a web-based tool designed to simplify the management, generation, and analysis of CVS-style receipt data. It leverages a structured product database (e.g., cvs-products-2025-05-03.json) to store and process details such as product names, SKUs, prices, and descriptions. Users can create, customize, save, and manage receipts in real-time, with features for product catalog management and receipt preview.
 Features
 
 Product Database Management: Store and retrieve product details from a JSON file.
-Receipt Generation: Create mock receipts based on selected products and quantities.
-Data Analysis: Summarize purchase data, including total costs and product categories.
-Extensible Format: Easily add new products to the JSON database.
+Receipt Generation: Create and customize CVS-style receipts with real-time previews.
+Saved Receipts: View and manage previously generated receipts.
+Product Management: Add, edit, and delete products in the catalog.
+Extensible Format: Easily update the product database with new items.
+
+![Create Receipt](https://raw.githubusercontent.com/exee21/ReceiptCraft/main/images/2025-05-03%2006.27.58%20goodtryhoe-receipt.replit.app%206992b92a2b20.png)
+![Saved Receipts](https://raw.githubusercontent.com/exee21/ReceiptCraft/main/images/2025-05-03%2006.28.19%20goodtryhoe-receipt.replit.app%20e06af74a57c0.png)
+![Product Management](https://raw.githubusercontent.com/exee21/ReceiptCraft/main/images/2025-05-03%2006.28.32%20goodtryhoe-receipt.replit.app%203afc8c4cbaf4.png)
 
 Getting Started
 Prerequisites
 
-Python 3.8+ (or specify your language/environment, e.g., Node.js)
+Node.js (for running the web app)
 Git for cloning the repository
+A modern web browser
 Optional: A text editor like VS Code
 
 Installation
@@ -21,10 +27,9 @@ git clone https://github.com/exee21/ReceiptCraft.git
 cd ReceiptCraft
 
 
-Install Dependencies:If using Python, install required packages:
-pip install -r requirements.txt
+Install Dependencies:Install required Node.js packages:
+npm install
 
-(Note: Update requirements.txt with dependencies like json or others as needed.)
 
 Set Up the Product Database:
 
@@ -45,42 +50,33 @@ Example JSON structure:[
 
 Usage
 
-Run the Application:Start the tool with:
-python main.py
+Run the Application:Start the web app locally with:
+npm start
 
-(Replace main.py with your entry point script, e.g., index.js for Node.js.)
+Alternatively, access the live version at https://goodtryhoe-receipt.replit.app.
 
-Example Commands:
+Example Workflow:
 
-Generate a receipt:python main.py generate-receipt --products "Viviscal™ Dry Shampoo,Trojan™ H2O Closer Lubricant" --quantities 2,1
-
-
-List all products:python main.py list-products
-
-
+Navigate to the "Create Receipt" tab to generate a new receipt.
+Add products using the "Product Entry" form and customize with "Template Customization."
+Save the receipt and view it under "Saved Receipts."
+Manage products via the "Manage Products" tab.
 
 
 Output:
 
-Receipts are saved as text files in the output/ directory or displayed in the console.
-Example receipt output:ReceiptCraft Receipt
--------------------
-Viviscal™ Dry Shampoo x2: $19.98
-Trojan™ H2O Closer Lubricant x1: $9.99
-Total: $29.97
--------------------
-
-
+Receipts are displayed in the browser with a real-time preview.
+Saved receipts are listed with options to view details.
 
 
 
 Project Structure
 
 cvs-products-2025-05-03.json: Product database with names, SKUs, prices, and descriptions.
-main.py: Main script for running the application (update based on your language).
-output/: Directory for generated receipts.
+index.html / index.js: Main files for the web app (update based on your structure).
+images/: Folder for screenshots (e.g., 2025-05-03 06.27.58 goodtryhoe-receipt.replit.app 6992b92a2b20.png).
 README.md: This file.
-requirements.txt: List of dependencies (if applicable).
+package.json: List of Node.js dependencies.
 
 Contributing
 Contributions are welcome! To contribute:
@@ -91,7 +87,7 @@ Make your changes and commit (git commit -m "Add your feature").
 Push to your branch (git push origin feature/your-feature).
 Open a Pull Request with a clear description of your changes.
 
-Please follow the Code of Conduct and ensure your code adheres to the project’s style guidelines (e.g., PEP 8 for Python).
+Please follow the Code of Conduct and ensure your code adheres to the project’s style guidelines.
 License
 This project is licensed under the MIT License. See the LICENSE file for details.
 Contact
@@ -99,5 +95,6 @@ For questions or suggestions, reach out via GitHub Issues or contact the maintai
 Acknowledgments
 
 Product data sourced from retail listings (e.g., Target.com, Amazon.com).
-Built with Python (or specify your tech stack).
+Built with Node.js and hosted on Replit.
+Web app available at https://goodtryhoe-receipt.replit.app.
 
