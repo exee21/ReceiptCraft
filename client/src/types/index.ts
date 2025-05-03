@@ -3,6 +3,7 @@ export interface ReceiptItem {
   name: string;
   price: number;
   sku: string;
+  quantity: number;
   receiptId?: number;
 }
 

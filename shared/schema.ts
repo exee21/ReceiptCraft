@@ -21,6 +21,7 @@ export const receiptItems = pgTable("receipt_items", {
   name: text("name").notNull(),
   price: numeric("price").notNull(),
   sku: text("sku").notNull(),
+  quantity: integer("quantity").notNull().default(1),
   receiptId: integer("receipt_id").notNull(),
 });
 
