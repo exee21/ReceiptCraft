@@ -10,9 +10,29 @@ interface ReceiptPreviewProps {
   items: ReceiptItem[];
   receiptInfo: ReceiptInfo;
   taxRate: number;
+  templateOptions?: {
+    storeAddress?: string;
+    storePhone?: string;
+    storeName?: string;
+    showBarcodeAtBottom?: boolean;
+    footerText?: string;
+    paperColor?: string;
+    textColor?: string;
+    returnDays?: number;
+  };
 }
 
-const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) => {
+const ReceiptPreview = ({ 
+  items, 
+  receiptInfo, 
+  taxRate,
+  templateOptions = {
+    footerText: 'RETURNS WITH RECEIPT THRU 6/29/2025',
+    showBarcodeAtBottom: true,
+    paperColor: 'default',
+    textColor: 'black'
+  }
+}: ReceiptPreviewProps) => {
   const receiptRef = useRef<HTMLDivElement>(null);
 
   // Calculate totals
@@ -49,13 +69,33 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
       <CardContent className="flex-grow overflow-auto flex justify-center">
         <div 
           ref={receiptRef}
-          className="bg-gradient-to-br from-orange-50 to-gray-100 border border-gray-200 p-4 text-xs whitespace-pre-wrap leading-tight text-black receipt-font"
+          className={`border border-gray-200 p-4 text-xs whitespace-pre-wrap leading-tight receipt-font ${
+            templateOptions.paperColor === 'default' 
+              ? 'bg-gradient-to-br from-orange-50 to-gray-100' 
+              : templateOptions.paperColor === 'white' 
+                ? 'bg-white' 
+                : templateOptions.paperColor === 'cream' 
+                  ? 'bg-gradient-to-br from-yellow-50 to-orange-50' 
+                  : 'bg-gradient-to-br from-yellow-50 to-yellow-100'
+          } ${
+            templateOptions.textColor === 'black'
+              ? 'text-black'
+              : templateOptions.textColor === 'dark-gray'
+                ? 'text-gray-800'
+                : 'text-blue-950'
+          }`}
           style={{ width: '300px', maxWidth: '100%', margin: '0 auto' }}
         >
           <div className="text-center mb-2">
             <div className="mb-1 flex justify-center">
-              <img src={cvsLogo} alt="CVS/pharmacy" style={{ width: '220px', height: 'auto' }} className="mb-1" />
+              <img src={cvsLogo} alt={templateOptions.storeName || "CVS/pharmacy"} style={{ width: '220px', height: 'auto' }} className="mb-1" />
             </div>
+            {templateOptions.storeAddress && (
+              <div className="text-center text-xs mb-1">{templateOptions.storeAddress}</div>
+            )}
+            {templateOptions.storePhone && (
+              <div className="text-center text-xs mb-1">{templateOptions.storePhone}</div>
+            )}
           </div>
           
           <div className="mb-2 monospace">
@@ -115,23 +155,25 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
             </div>
           </div>
           
-          <div className="text-center mb-2">
-            <div className="mx-auto mb-1 flex justify-center">
-              <Barcode
-                value={`${receiptInfo.randomNumbers[0]} ${receiptInfo.randomNumbers[1]} ${receiptInfo.randomNumbers[2]} ${receiptInfo.randomNumbers[3]}`}
-                width={0.8}
-                height={40}
-                fontSize={7}
-                margin={0}
-                displayValue={true}
-                fontOptions="bold"
-                font="OCR-A"
-              />
+          {templateOptions.showBarcodeAtBottom && (
+            <div className="text-center mb-2">
+              <div className="mx-auto mb-1 flex justify-center">
+                <Barcode
+                  value={`${receiptInfo.randomNumbers[0]} ${receiptInfo.randomNumbers[1]} ${receiptInfo.randomNumbers[2]} ${receiptInfo.randomNumbers[3]}`}
+                  width={0.8}
+                  height={40}
+                  fontSize={7}
+                  margin={0}
+                  displayValue={true}
+                  fontOptions="bold"
+                  font="OCR-A"
+                />
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="text-center mb-3">
-            RETURNS WITH RECEIPT THRU 6/29/2025
+            {templateOptions.footerText || 'RETURNS WITH RECEIPT THRU 6/29/2025'}
           </div>
           
           <div className="text-center">

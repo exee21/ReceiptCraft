@@ -337,6 +337,7 @@ const Home = () => {
               items={items}
               receiptInfo={receiptInfo}
               taxRate={taxRate}
+              templateOptions={templateOptions}
             />
           </div>
         </div>
@@ -347,6 +348,14 @@ const Home = () => {
           items={items}
           onEditItem={editItem}
           onDeleteItem={deleteItem}
+        />
+      </div>
+      
+      <div className="mt-6">
+        <ReceiptCustomization
+          options={templateOptions}
+          onChange={handleTemplateChange}
+          onReset={resetTemplateOptions}
         />
       </div>
       
