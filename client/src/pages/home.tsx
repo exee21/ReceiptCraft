@@ -184,10 +184,11 @@ const Home = () => {
         description: "Your receipt has been saved to the database",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error saving receipt:", error);
       toast({
         title: "Error",
-        description: "Failed to save the receipt",
+        description: "Failed to save the receipt. Check console for details.",
         variant: "destructive",
       });
     }
