@@ -66,10 +66,11 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
           <div className="mb-3">
             {items.map((item, index) => (
               <div key={index} className="mb-1">
-                <div className="flex-none" style={{ fontFamily: 'Courier, monospace', color: '#000000' }}>
-                  {formatItemLine(item)}
+                <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace', color: '#000000' }}>
+                  <span>{item.name}</span>
+                  <span>{formatCurrency(item.price)}</span>
                 </div>
-                <div className="ml-2" style={{ fontFamily: 'Courier, monospace', color: '#000000' }}>
+                <div style={{ fontFamily: 'Courier, monospace', color: '#000000' }}>
                   {item.sku}
                 </div>
               </div>
@@ -77,24 +78,30 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
           </div>
           
           <div className="mb-3">
-            <div className="text-right" style={{ fontFamily: 'Courier, monospace' }}>
-              SUBTOTAL{' '.repeat(16)}{formatCurrency(subtotal)}
+            <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
+              <span>SUBTOTAL</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
-            <div className="text-right" style={{ fontFamily: 'Courier, monospace' }}>
-              AR TAX {taxRate}%{' '.repeat(10)}{formatCurrency(tax)}
+            <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
+              <span>AR TAX {taxRate}%</span>
+              <span>{formatCurrency(tax)}</span>
             </div>
-            <div className="text-right font-bold" style={{ fontFamily: 'Courier, monospace' }}>
-              TOTAL{' '.repeat(19)}{formatCurrency(total)}
+            <div className="flex justify-between font-bold" style={{ fontFamily: 'Courier, monospace' }}>
+              <span>TOTAL</span>
+              <span>{formatCurrency(total)}</span>
             </div>
           </div>
           
           <div className="mb-3">
             <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
               <span>*{receiptInfo.cardLastFour} DEBIT</span>
+              <span>{formatCurrency(total)}</span>
+            </div>
+            <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
+              <span>AID {receiptInfo.aidCode}</span>
               <span>TOTAL PAYMENT</span>
             </div>
-            <div>AID {receiptInfo.aidCode}</div>
-            <div>US DEBIT</div>
+            <div style={{ marginLeft: '0', fontFamily: 'Courier, monospace' }}>US DEBIT</div>
           </div>
           
           <div className="mb-3">

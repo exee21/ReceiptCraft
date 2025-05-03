@@ -44,21 +44,34 @@ const Home = () => {
         const scannedProduct = JSON.parse(scannedProductString);
         // Add the scanned product to the receipt
         if (scannedProduct && scannedProduct.name && scannedProduct.price) {
-          addItem({
-            name: scannedProduct.name,
-            price: Number(scannedProduct.price),
-            sku: scannedProduct.sku || '',
-            quantity: 1
-          });
+          // Get quantity from session storage or default to 1
+          let quantity = sessionStorage.getItem('scannedProductQuantity') ? 
+            parseInt(sessionStorage.getItem('scannedProductQuantity') || '1') : 1;
+            
+          // Ensure quantity is a valid number
+          if (isNaN(quantity) || quantity < 1) {
+            quantity = 1;
+          }
+          
+          // Add the item multiple times based on quantity
+          for (let i = 0; i < quantity; i++) {
+            addItem({
+              name: scannedProduct.name,
+              price: Number(scannedProduct.price),
+              sku: scannedProduct.sku || '',
+              quantity: 1
+            });
+          }
           
           toast({
             title: "Scanned Product Added",
-            description: `${scannedProduct.name} added from scanner`,
+            description: `${quantity > 1 ? quantity + ' ' : ''}${scannedProduct.name} added from scanner`,
           });
         }
         
         // Clear the sessionStorage
         sessionStorage.removeItem('scannedProduct');
+        sessionStorage.removeItem('scannedProductQuantity');
       } catch (error) {
         console.error('Error processing scanned product:', error);
       }

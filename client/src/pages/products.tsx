@@ -8,6 +8,7 @@ import { Product } from '@/types';
 import { apiRequest } from '@/lib/queryClient';
 import { formatCurrency } from '@/lib/receiptUtils';
 import { Loader, PlusCircle, Download, Upload, AlertCircle } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Dialog, 
@@ -37,6 +38,7 @@ export default function ProductsPage() {
   const [creatingProduct, setCreatingProduct] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [location, setLocation] = useLocation();
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
@@ -75,11 +77,41 @@ export default function ProductsPage() {
   };
 
   const handleAddToReceipt = (product: Product) => {
-    // We'll implement this functionality later
+    // Prompt user for quantity
+    const quantityStr = prompt("Enter quantity:", "1");
+    
+    // Validate quantity
+    if (!quantityStr) return; // User cancelled
+    
+    const quantity = parseInt(quantityStr);
+    if (isNaN(quantity) || quantity < 1) {
+      toast({
+        title: "Invalid quantity",
+        description: "Quantity must be a positive number",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create the receipt item
+    const receiptItem = {
+      name: product.name,
+      price: Number(product.price),
+      sku: product.sku,
+      quantity: 1 // Always use 1 as we'll add individual items instead of using quantity
+    };
+    
+    // Store product in session storage for the home page to pick up
+    sessionStorage.setItem('scannedProduct', JSON.stringify(receiptItem));
+    
+    // Add to receipt and show toast
     toast({
       title: "Product added",
-      description: `${product.name} added to receipt`,
+      description: `${quantity} ${product.name} added to receipt`,
     });
+    
+    // Navigate back to the home page
+    navigate('/');
   };
   
   // Function to handle exporting products
