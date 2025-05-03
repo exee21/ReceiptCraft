@@ -143,7 +143,7 @@ const Home = () => {
       const receiptData: InsertReceipt = {
         date: receiptInfo.date,
         time: receiptInfo.time,
-        taxRate: taxRate,
+        taxRate: taxRate.toString(), // Convert to string to satisfy API
         regNumber: receiptInfo.regNumber,
         transNumber: receiptInfo.transNumber,
         helperName: receiptInfo.helperName,
@@ -163,17 +163,16 @@ const Home = () => {
 
       // Then save each item with the receipt ID
       for (const item of items) {
-        await apiRequest(
-          'POST',
-          '/api/receipt-items',
-          {
+        await apiRequest('/api/receipt-items', {
+          method: 'POST',
+          body: JSON.stringify({
             name: item.name,
-            price: item.price,
+            price: item.price.toString(), // Convert to string
             sku: item.sku,
             quantity: item.quantity,
             receiptId: savedReceipt.id,
-          }
-        );
+          })
+        });
       }
 
       return savedReceipt;

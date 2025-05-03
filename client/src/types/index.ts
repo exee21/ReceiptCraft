@@ -26,7 +26,7 @@ export interface Receipt {
 export interface InsertReceipt {
   date: string;
   time: string;
-  taxRate: number;
+  taxRate: number | string; // Accept both number and string for flexibility
   regNumber: string;
   transNumber: string;
   helperName: string;
