@@ -41,17 +41,24 @@ const Home = () => {
     const scannedProductString = sessionStorage.getItem('scannedProduct');
     if (scannedProductString) {
       try {
+        console.log("Found scanned product in session storage:", scannedProductString);
         const scannedProduct = JSON.parse(scannedProductString);
+        
         // Add the scanned product to the receipt
         if (scannedProduct && scannedProduct.name && scannedProduct.price) {
           // Get quantity from session storage or default to 1
-          let quantity = sessionStorage.getItem('scannedProductQuantity') ? 
-            parseInt(sessionStorage.getItem('scannedProductQuantity') || '1') : 1;
+          const quantityStr = sessionStorage.getItem('scannedProductQuantity'); 
+          console.log("Retrieved quantity from session storage:", quantityStr);
+          
+          let quantity = quantityStr ? parseInt(quantityStr) : 1;
             
           // Ensure quantity is a valid number
           if (isNaN(quantity) || quantity < 1) {
+            console.log("Invalid quantity, defaulting to 1");
             quantity = 1;
           }
+          
+          console.log(`Adding ${quantity} units of ${scannedProduct.name}`);
           
           // Add the item multiple times based on quantity
           for (let i = 0; i < quantity; i++) {
@@ -155,11 +162,11 @@ const Home = () => {
         randomNumbers: receiptInfo.randomNumbers,
       };
 
-      const response = await apiRequest('/api/receipts', {
+      // apiRequest already returns the parsed JSON, no need to parse again
+      const savedReceipt: Receipt = await apiRequest('/api/receipts', {
         method: 'POST',
         body: JSON.stringify(receiptData)
       });
-      const savedReceipt: Receipt = await response.json();
 
       // Then save each item with the receipt ID
       for (const item of items) {

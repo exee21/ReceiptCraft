@@ -54,59 +54,70 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
         >
           <div className="text-center mb-2">
             <div className="mb-1 flex justify-center">
-              <img src={cvsLogo} alt="CVS/pharmacy" style={{ width: '250px', height: 'auto' }} />
+              <div className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'Arial, sans-serif' }}>CVS/pharmacy</div>
+            </div>
+            <div className="text-xs">
+              2015 Fayetteville Rd, VAN BUREN, AR 72956
+            </div>
+            <div className="text-xs">
+              (479)471-1608
             </div>
           </div>
           
-          <div className="mb-3">
-            <div>REG#{receiptInfo.regNumber} TRN#{receiptInfo.transNumber} CSHR#{receiptInfo.cashierNumber} STR#{receiptInfo.storeNumber}</div>
+          <div className="mb-2 monospace">
+            <div>REG#{receiptInfo.regNumber} TRN#{receiptInfo.transNumber} CSHR#{receiptInfo.cashierNumber}</div>
+            <div>STR#{receiptInfo.storeNumber}</div>
             <div>HELPED BY: {receiptInfo.helperName}</div>
           </div>
           
-          <div className="mb-3">
+          <div className="mb-2">
             {items.map((item, index) => (
-              <div key={index} className="mb-1">
-                <div className="flex justify-between" style={{ color: '#000000' }}>
-                  <span>{item.name}</span>
-                  <span>{formatCurrency(item.price)}</span>
-                </div>
-                <div style={{ color: '#000000' }}>
-                  {item.sku}
+              <div key={index} className="monospace">
+                <div>{item.name}</div>
+                <div>{item.sku}</div>
+                <div className="flex">
+                  <span style={{ flex: 1 }}></span>
+                  <span>{formatCurrency(item.price * (item.quantity || 1))}</span>
                 </div>
               </div>
             ))}
           </div>
           
-          <div className="mb-3">
-            <div className="flex justify-between">
+          <div className="mb-2">
+            <div className="monospace flex">
               <span>SUBTOTAL</span>
+              <span style={{ flex: 1 }}></span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="monospace flex">
               <span>AR TAX {taxRate}%</span>
+              <span style={{ flex: 1 }}></span>
               <span>{formatCurrency(tax)}</span>
             </div>
-            <div className="flex justify-between font-bold">
+            <div className="monospace flex font-bold">
               <span>TOTAL</span>
+              <span style={{ flex: 1 }}></span>
               <span>{formatCurrency(total)}</span>
             </div>
           </div>
           
-          <div className="mb-3">
-            <div className="flex justify-between">
+          <div className="mb-2">
+            <div className="monospace flex">
               <span>*{receiptInfo.cardLastFour} DEBIT</span>
+              <span style={{ flex: 1 }}></span>
               <span>{formatCurrency(total)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="monospace flex">
               <span>AID {receiptInfo.aidCode}</span>
+              <span style={{ flex: 1 }}></span>
               <span>TOTAL PAYMENT</span>
             </div>
-            <div style={{ marginLeft: '0' }}>US DEBIT</div>
+            <div className="monospace">US DEBIT</div>
           </div>
           
-          <div className="mb-3">
+          <div className="mb-2 monospace">
             <div>
-              # OF ITEMS SOLD {items.reduce((total, item) => total + (item.quantity || 1), 0)}    {receiptInfo.date}    {receiptInfo.time}
+              # OF ITEMS SOLD {items.reduce((total, item) => total + (item.quantity || 1), 0)} {receiptInfo.date} {receiptInfo.time}
             </div>
           </div>
           

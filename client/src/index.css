@@ -18,6 +18,12 @@
   letter-spacing: 0.01em;
 }
 
+.monospace {
+  font-family: 'OCR-A', 'Courier New', monospace;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 20 14.3% 4.1%;
