@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* OCR-A Standard Font - Receipt Style */
+@font-face {
+  font-family: 'OCR-A';
+  src: url('https://cdn.jsdelivr.net/npm/ocr-a@1.0.0/ocr-a.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/npm/ocr-a@1.0.0/ocr-a.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.receipt-font {
+  font-family: 'OCR-A', 'Courier New', monospace;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 20 14.3% 4.1%;

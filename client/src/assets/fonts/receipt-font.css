@@ -1,0 +1,15 @@
+/* Receipt Font CSS */
+@font-face {
+  font-family: 'ReceiptFont';
+  src: local('OCR A Std'), local('OCR-A'), local('OCRA'), 
+       local('Liberation Mono'), local('Courier New');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.receipt-font {
+  font-family: 'ReceiptFont', 'Courier New', 'Courier', monospace;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}

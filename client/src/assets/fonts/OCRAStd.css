@@ -1,0 +1,15 @@
+/* OCR-A Standard Font CSS */
+@font-face {
+  font-family: 'OCR-A';
+  src: url('https://cdn.jsdelivr.net/npm/ocr-a@1.0.0/ocr-a.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/npm/ocr-a@1.0.0/ocr-a.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.ocr-font {
+  font-family: 'OCR-A', 'Courier New', monospace;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
