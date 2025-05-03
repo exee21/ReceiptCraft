@@ -108,12 +108,15 @@ const ReceiptForm = ({
       return;
     }
 
-    addItem({
-      name: productName,
-      price,
-      sku: productSku,
-      quantity
-    });
+    // If quantity is greater than 1, add multiple separate items instead of one with quantity
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        name: productName,
+        price,
+        sku: productSku,
+        quantity: 1
+      });
+    }
 
     // Clear form
     setProductName('');

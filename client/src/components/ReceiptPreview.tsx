@@ -49,8 +49,8 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
       <CardContent className="flex-grow overflow-auto flex justify-center">
         <div 
           ref={receiptRef}
-          className="bg-gradient-to-br from-orange-50 to-gray-100 border border-gray-200 p-4 max-w-sm font-mono text-xs whitespace-pre-wrap leading-tight text-black"
-          style={{ width: '320px', fontFamily: 'Courier, monospace' }}
+          className="bg-gradient-to-br from-orange-50 to-gray-100 border border-gray-200 p-4 font-mono text-xs whitespace-pre-wrap leading-tight text-black"
+          style={{ width: '380px', maxWidth: '100%', fontFamily: 'Courier, monospace' }}
         >
           <div className="text-center mb-2">
             <div className="mb-1 flex justify-center">

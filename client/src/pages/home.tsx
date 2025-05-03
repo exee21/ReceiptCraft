@@ -13,7 +13,7 @@ import { Link } from 'wouter';
 
 const Home = () => {
   const [items, setItems] = useState<ReceiptItem[]>([]);
-  const [taxRate, setTaxRate] = useState(8.5);
+  const [taxRate, setTaxRate] = useState(9.75);
   const [receiptInfo, setReceiptInfo] = useState<ReceiptInfo>(generateReceiptInfo());
   const [dateInput, setDateInput] = useState(getFormattedDateTime().date);
   const [timeInput, setTimeInput] = useState(getFormattedDateTime().time);
