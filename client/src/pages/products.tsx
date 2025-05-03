@@ -108,9 +108,20 @@ export default function ProductsPage() {
     setCreatingProduct(true);
     
     try {
+      // Create a properly formatted product data object
+      const productData = {
+        name: newProduct.name,
+        sku: newProduct.sku,
+        price: String(newProduct.price), // Convert to string for numeric column
+        description: newProduct.description || null,
+        category: newProduct.category || null
+      };
+      
+      console.log("Sending product data:", productData);
+      
       const result = await apiRequest<Product>('/api/products', { 
         method: 'POST',
-        body: JSON.stringify(newProduct)
+        body: JSON.stringify(productData)
       });
       
       // Add the new product to the results
