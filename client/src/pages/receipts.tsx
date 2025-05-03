@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useRoute } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Receipt, ReceiptItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import ReceiptPreview from '@/components/ReceiptPreview';
+import { generatePrintHTML } from '@/lib/receiptUtils';
 
 const ReceiptsPage = () => {
-  const [, setLocation] = useRoute('/receipts');
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [receiptItems, setReceiptItems] = useState<ReceiptItem[]>([]);
+  const receiptRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch all receipts
   const { data: receipts, isLoading: receiptsLoading, error: receiptsError } = useQuery({
@@ -58,6 +60,25 @@ const ReceiptsPage = () => {
       </div>
     );
   }
+  
+  const printReceipt = () => {
+    if (!receiptRef.current) return;
+    
+    // Open a new window with the receipt HTML
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Popup Blocked",
+        description: "Please allow popups to print the receipt",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const receiptHTML = receiptRef.current.innerHTML;
+    printWindow.document.write(generatePrintHTML(receiptHTML));
+    printWindow.document.close();
+  };
 
   const formatDate = (dateString: string) => {
     try {
@@ -134,13 +155,22 @@ const ReceiptsPage = () => {
             <div className="p-4 border-b">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold">Receipt #{selectedReceipt.id}</h2>
-                <Button 
-                  variant="ghost" 
-                  className="text-gray-500 hover:text-gray-700"
-                  onClick={() => setSelectedReceipt(null)}
-                >
-                  Close
-                </Button>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    className="text-red-600 border-red-600 hover:bg-red-50"
+                    onClick={printReceipt}
+                  >
+                    Print
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="text-gray-500 hover:text-gray-700"
+                    onClick={() => setSelectedReceipt(null)}
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="p-6">
@@ -151,23 +181,25 @@ const ReceiptsPage = () => {
                   Error loading receipt items: {(itemsError as Error).message}
                 </div>
               ) : (
-                <ReceiptPreview
-                  items={receiptItems}
-                  receiptInfo={{
-                    regNumber: selectedReceipt.regNumber,
-                    transNumber: selectedReceipt.transNumber,
-                    cashierNumber: selectedReceipt.cashierNumber,
-                    storeNumber: selectedReceipt.storeNumber,
-                    cardLastFour: selectedReceipt.cardLastFour,
-                    authCode: selectedReceipt.authCode,
-                    aidCode: selectedReceipt.aidCode,
-                    randomNumbers: selectedReceipt.randomNumbers,
-                    date: selectedReceipt.date,
-                    time: selectedReceipt.time,
-                    helperName: selectedReceipt.helperName
-                  }}
-                  taxRate={Number(selectedReceipt.taxRate)}
-                />
+                <div ref={receiptRef}>
+                  <ReceiptPreview
+                    items={receiptItems}
+                    receiptInfo={{
+                      regNumber: selectedReceipt.regNumber,
+                      transNumber: selectedReceipt.transNumber,
+                      cashierNumber: selectedReceipt.cashierNumber,
+                      storeNumber: selectedReceipt.storeNumber,
+                      cardLastFour: selectedReceipt.cardLastFour,
+                      authCode: selectedReceipt.authCode,
+                      aidCode: selectedReceipt.aidCode,
+                      randomNumbers: selectedReceipt.randomNumbers,
+                      date: selectedReceipt.date,
+                      time: selectedReceipt.time,
+                      helperName: selectedReceipt.helperName
+                    }}
+                    taxRate={Number(selectedReceipt.taxRate)}
+                  />
+                </div>
               )}
             </div>
           </div>
