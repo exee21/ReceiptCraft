@@ -1,19 +1,35 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/types';
 import { apiRequest } from '@/lib/queryClient';
 import { formatCurrency } from '@/lib/receiptUtils';
-import { Loader } from 'lucide-react';
+import { Loader, PlusCircle } from 'lucide-react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter,
+  DialogDescription 
+} from '@/components/ui/dialog';
 
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState<Partial<Product>>({
+    name: '',
+    sku: '',
+    price: 0,
+    description: '',
+  });
+  const [creatingProduct, setCreatingProduct] = useState(false);
   const { toast } = useToast();
 
   const handleSearch = async () => {
@@ -59,6 +75,71 @@ export default function ProductsPage() {
       description: `${product.name} added to receipt`,
     });
   };
+  
+  const handleCreateProduct = async () => {
+    // Validate fields
+    if (!newProduct.name?.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please enter a product name",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!newProduct.sku?.trim()) {
+      toast({
+        title: "SKU required",
+        description: "Please enter a product SKU",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!newProduct.price || Number(newProduct.price) <= 0) {
+      toast({
+        title: "Valid price required",
+        description: "Please enter a valid price greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setCreatingProduct(true);
+    
+    try {
+      const result = await apiRequest<Product>('/api/products', { 
+        method: 'POST',
+        body: JSON.stringify(newProduct)
+      });
+      
+      // Add the new product to the results
+      setProducts(prev => [result, ...prev]);
+      
+      // Close the dialog and reset form
+      setShowAddProduct(false);
+      setNewProduct({
+        name: '',
+        sku: '',
+        price: 0,
+        description: '',
+      });
+      
+      toast({
+        title: "Product created",
+        description: `${result.name} has been added to the database`,
+      });
+    } catch (error) {
+      console.error('Error creating product:', error);
+      toast({
+        title: "Failed to create product",
+        description: "There was an error adding the product to the database",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingProduct(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -88,10 +169,26 @@ export default function ProductsPage() {
 
       {searched && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl">
               {loading ? 'Searching...' : `Search Results (${products.length})`}
             </CardTitle>
+            <Button 
+              onClick={() => {
+                setNewProduct({
+                  name: searchTerm,
+                  sku: '',
+                  price: 0,
+                  description: '',
+                });
+                setShowAddProduct(true);
+              }}
+              variant="outline"
+              size="sm"
+              className="flex items-center"
+            >
+              <PlusCircle className="h-4 w-4 mr-1" /> Add New Product
+            </Button>
           </CardHeader>
           <CardContent>
             {products.length > 0 ? (
@@ -137,6 +234,90 @@ export default function ProductsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Add Product Dialog */}
+      <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+            <DialogDescription>
+              Enter product details to add to the database.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="name" className="text-right font-medium">
+                Name
+              </label>
+              <Input
+                id="name"
+                value={newProduct.name || ''}
+                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                className="col-span-3"
+                placeholder="Product name"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="sku" className="text-right font-medium">
+                SKU
+              </label>
+              <Input
+                id="sku"
+                value={newProduct.sku || ''}
+                onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
+                className="col-span-3"
+                placeholder="Product SKU"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="price" className="text-right font-medium">
+                Price
+              </label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={Number(newProduct.price) || ''}
+                onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+                className="col-span-3"
+                placeholder="0.00"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="description" className="text-right font-medium">
+                Description
+              </label>
+              <Input
+                id="description"
+                value={newProduct.description || ''}
+                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                className="col-span-3"
+                placeholder="Optional description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAddProduct(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateProduct}
+              disabled={creatingProduct}
+            >
+              {creatingProduct ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : 'Create Product'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
