@@ -76,3 +76,12 @@ export interface ReceiptInfo {
   time: string;
   helperName: string;
 }
+
+export interface Product {
+  id: number;
+  name: string;
+  price: number | string; // Handle both number and string from the API
+  sku: string;
+  description?: string;
+  category?: string;
+}
