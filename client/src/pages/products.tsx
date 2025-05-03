@@ -103,6 +103,8 @@ export default function ProductsPage() {
     
     // Store product in session storage for the home page to pick up
     sessionStorage.setItem('scannedProduct', JSON.stringify(receiptItem));
+    // Store the quantity separately
+    sessionStorage.setItem('scannedProductQuantity', quantity.toString());
     
     // Add to receipt and show toast
     toast({
@@ -111,7 +113,7 @@ export default function ProductsPage() {
     });
     
     // Navigate back to the home page
-    navigate('/');
+    setLocation('/');
   };
   
   // Function to handle exporting products

@@ -155,11 +155,10 @@ const Home = () => {
         randomNumbers: receiptInfo.randomNumbers,
       };
 
-      const response = await apiRequest(
-        'POST',
-        '/api/receipts',
-        receiptData
-      );
+      const response = await apiRequest('/api/receipts', {
+        method: 'POST',
+        body: JSON.stringify(receiptData)
+      });
       const savedReceipt: Receipt = await response.json();
 
       // Then save each item with the receipt ID

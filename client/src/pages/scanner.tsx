@@ -115,13 +115,32 @@ export default function ScannerPage() {
   // Function to add the found product to the receipt
   const handleAddToReceipt = () => {
     if (foundProduct) {
+      // Prompt user for quantity
+      const quantityStr = prompt("Enter quantity:", "1");
+      
+      // Validate quantity
+      if (!quantityStr) return; // User cancelled
+      
+      const quantity = parseInt(quantityStr);
+      if (isNaN(quantity) || quantity < 1) {
+        toast.toast({
+          title: "Invalid quantity",
+          description: "Quantity must be a positive number",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       // Use sessionStorage to pass the product to the home page
       sessionStorage.setItem('scannedProduct', JSON.stringify(foundProduct));
+      // Also store the quantity
+      sessionStorage.setItem('scannedProductQuantity', quantity.toString());
+      
       setLocation('/');
       
       toast.toast({
         title: "Product Added",
-        description: `${foundProduct.name} will be added to your receipt`,
+        description: `${quantity > 1 ? quantity + ' ' : ''}${foundProduct.name} will be added to your receipt`,
       });
     }
   };

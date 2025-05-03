@@ -78,34 +78,34 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
           </div>
           
           <div className="mb-3">
-            <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
+            <div className="flex justify-between">
               <span>SUBTOTAL</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
+            <div className="flex justify-between">
               <span>AR TAX {taxRate}%</span>
               <span>{formatCurrency(tax)}</span>
             </div>
-            <div className="flex justify-between font-bold" style={{ fontFamily: 'Courier, monospace' }}>
+            <div className="flex justify-between font-bold">
               <span>TOTAL</span>
               <span>{formatCurrency(total)}</span>
             </div>
           </div>
           
           <div className="mb-3">
-            <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
+            <div className="flex justify-between">
               <span>*{receiptInfo.cardLastFour} DEBIT</span>
               <span>{formatCurrency(total)}</span>
             </div>
-            <div className="flex justify-between" style={{ fontFamily: 'Courier, monospace' }}>
+            <div className="flex justify-between">
               <span>AID {receiptInfo.aidCode}</span>
               <span>TOTAL PAYMENT</span>
             </div>
-            <div style={{ marginLeft: '0', fontFamily: 'Courier, monospace' }}>US DEBIT</div>
+            <div style={{ marginLeft: '0' }}>US DEBIT</div>
           </div>
           
           <div className="mb-3">
-            <div style={{ fontFamily: 'Courier, monospace' }}>
+            <div>
               # OF ITEMS SOLD {items.reduce((total, item) => total + (item.quantity || 1), 0)}    {receiptInfo.date}    {receiptInfo.time}
             </div>
           </div>
@@ -119,6 +119,8 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
                 fontSize={8}
                 margin={0}
                 displayValue={true}
+                fontOptions="bold"
+                font="OCR-A"
               />
             </div>
           </div>
