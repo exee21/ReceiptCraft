@@ -37,7 +37,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="bg-background border-b p-4 mb-6">
+    <nav className="border-b border-gray-800 p-4 mb-6 bg-gradient-dark-orange shadow-lg">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
         <div className="flex items-center mb-4 md:mb-0">
           <h1 className="text-xl font-bold text-foreground">CVS Receipt Generator</h1>

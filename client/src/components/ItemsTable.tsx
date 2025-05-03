@@ -29,7 +29,9 @@ const ItemsTable = ({ items, onEditItem, onDeleteItem }: ItemsTableProps) => {
               <TableRow>
                 <TableHead>Product</TableHead>
                 <TableHead>SKU</TableHead>
+                <TableHead className="text-right">Qty</TableHead>
                 <TableHead className="text-right">Price</TableHead>
+                <TableHead className="text-right">Total</TableHead>
                 <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>

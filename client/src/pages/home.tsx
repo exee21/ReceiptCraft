@@ -47,7 +47,8 @@ const Home = () => {
           addItem({
             name: scannedProduct.name,
             price: Number(scannedProduct.price),
-            sku: scannedProduct.sku || ''
+            sku: scannedProduct.sku || '',
+            quantity: 1
           });
           
           toast({
@@ -157,6 +158,7 @@ const Home = () => {
             name: item.name,
             price: item.price,
             sku: item.sku,
+            quantity: item.quantity,
             receiptId: savedReceipt.id,
           }
         );

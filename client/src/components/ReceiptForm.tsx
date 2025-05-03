@@ -1,11 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ReceiptItem } from '@/types';
-import { Printer, RefreshCw, Plus } from 'lucide-react';
+import { ReceiptItem, Product } from '@/types';
+import { Printer, RefreshCw, Plus, Search, Package2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { apiRequest } from '@/lib/queryClient';
+import { formatCurrency } from '@/lib/receiptUtils';
 
 interface ReceiptFormProps {
   addItem: (item: ReceiptItem) => void;
@@ -33,6 +53,43 @@ const ReceiptForm = ({
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
   const [productSku, setProductSku] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showProductSelector, setShowProductSelector] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Fetch products for the catalog
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const url = searchTerm 
+        ? `/api/products?search=${encodeURIComponent(searchTerm)}`
+        : '/api/products';
+      const results = await apiRequest<Product[]>(url, { method: 'GET' });
+      setProducts(results);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load products when search term changes or when dialog opens
+  useEffect(() => {
+    if (showProductSelector) {
+      fetchProducts();
+    }
+  }, [searchTerm, showProductSelector]);
+
+  const handleSelectProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setProductName(product.name);
+    setProductPrice(String(product.price));
+    setProductSku(product.sku);
+    setShowProductSelector(false);
+  };
 
   const handleAddItem = () => {
     if (!productName || !productPrice || !productSku) {
@@ -46,16 +103,24 @@ const ReceiptForm = ({
       return;
     }
 
+    if (quantity <= 0) {
+      alert('Quantity must be greater than 0');
+      return;
+    }
+
     addItem({
       name: productName,
       price,
-      sku: productSku
+      sku: productSku,
+      quantity
     });
 
     // Clear form
     setProductName('');
     setProductPrice('');
     setProductSku('');
+    setQuantity(1);
+    setSelectedProduct(null);
   };
 
   return (
@@ -92,7 +157,74 @@ const ReceiptForm = ({
 
         <Separator />
         
-        <h3 className="text-lg font-semibold">Product Entry</h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">Product Entry</h3>
+          <Dialog open={showProductSelector} onOpenChange={setShowProductSelector}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="flex items-center"
+              >
+                <Package2 className="h-4 w-4 mr-1" /> Select Product
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Select a Product</DialogTitle>
+                <DialogDescription>
+                  Search for and select a product from the catalog
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-4 space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={fetchProducts} disabled={loading}>
+                    {loading ? <Search className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  </Button>
+                </div>
+                
+                <div className="border rounded-md h-64 overflow-auto">
+                  {products.length > 0 ? (
+                    <div className="divide-y">
+                      {products.map((product) => (
+                        <div 
+                          key={product.id} 
+                          className="p-3 hover:bg-accent cursor-pointer"
+                          onClick={() => handleSelectProduct(product)}
+                        >
+                          <div className="font-medium">{product.name}</div>
+                          <div className="flex justify-between text-sm text-muted-foreground">
+                            <span>SKU: {product.sku}</span>
+                            <span>{formatCurrency(Number(product.price))}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      {loading ? 'Loading...' : 'No products found. Try searching for something else.'}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowProductSelector(false)}
+                >
+                  Cancel
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         
         <div className="space-y-3">
           <div className="space-y-1">
@@ -129,6 +261,17 @@ const ReceiptForm = ({
                 onChange={(e) => setProductSku(e.target.value)}
               />
             </div>
+          </div>
+          
+          <div className="space-y-1">
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input
+              type="number"
+              id="quantity"
+              min="1"
+              value={quantity}
+              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+            />
           </div>
           
           <div className="flex justify-end">
