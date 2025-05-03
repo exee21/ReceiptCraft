@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/types';
 import { apiRequest } from '@/lib/queryClient';
 import { formatCurrency } from '@/lib/receiptUtils';
-import { Loader, PlusCircle } from 'lucide-react';
+import { Loader, PlusCircle, Download, Upload, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Dialog, 
   DialogContent, 
@@ -23,6 +24,10 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importData, setImportData] = useState('');
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: '',
     sku: '',
@@ -30,6 +35,7 @@ export default function ProductsPage() {
     description: '',
   });
   const [creatingProduct, setCreatingProduct] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleSearch = async () => {
@@ -74,6 +80,147 @@ export default function ProductsPage() {
       title: "Product added",
       description: `${product.name} added to receipt`,
     });
+  };
+  
+  // Function to handle exporting products
+  const handleExportProducts = () => {
+    // First make sure we have products to export
+    if (!products.length) {
+      toast({
+        title: "No products to export",
+        description: "Please search for products first",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Format products for export
+    const exportData = products.map(product => ({
+      name: product.name,
+      sku: product.sku,
+      price: product.price,
+      description: product.description || ''
+    }));
+    
+    // Convert to JSON string
+    const jsonString = JSON.stringify(exportData, null, 2);
+    
+    // Create a blob and download link
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cvs-products-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+    
+    toast({
+      title: "Export successful",
+      description: `${products.length} products exported to JSON`,
+    });
+  };
+  
+  // Function to handle importing products
+  const handleImportProducts = async () => {
+    setImporting(true);
+    setImportError(null);
+    
+    try {
+      if (!importData.trim()) {
+        setImportError("Please enter product data");
+        return;
+      }
+      
+      // Parse the JSON data
+      let productsToImport: any[];
+      try {
+        productsToImport = JSON.parse(importData);
+        if (!Array.isArray(productsToImport)) {
+          throw new Error("Import data must be an array");
+        }
+      } catch (error) {
+        setImportError("Invalid JSON format. Please check your data.");
+        setImporting(false);
+        return;
+      }
+      
+      // Validate the product data
+      const invalidProducts = productsToImport.filter(p => 
+        !p.name || !p.sku || !p.price || isNaN(Number(p.price))
+      );
+      
+      if (invalidProducts.length > 0) {
+        setImportError(`${invalidProducts.length} product(s) have invalid data. All products must have name, sku, and valid price.`);
+        setImporting(false);
+        return;
+      }
+      
+      // Import each product
+      const successfulImports: Product[] = [];
+      let importErrors = 0;
+      
+      for (const product of productsToImport) {
+        try {
+          const productData = {
+            name: product.name,
+            sku: product.sku,
+            price: String(product.price),
+            description: product.description || null,
+            category: product.category || null
+          };
+          
+          const result = await apiRequest<Product>('/api/products', { 
+            method: 'POST',
+            body: JSON.stringify(productData)
+          });
+          
+          successfulImports.push(result);
+        } catch (error) {
+          console.error(`Error importing product ${product.name}:`, error);
+          importErrors++;
+        }
+      }
+      
+      // Update the UI
+      if (successfulImports.length > 0) {
+        setProducts(prev => [...successfulImports, ...prev]);
+        
+        toast({
+          title: "Import successful",
+          description: `${successfulImports.length} product(s) imported successfully${importErrors > 0 ? `, ${importErrors} failed` : ''}`,
+        });
+        
+        // Close the dialog and reset
+        setShowImportDialog(false);
+        setImportData('');
+      } else {
+        setImportError("No products were imported. Please check your data and try again.");
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      setImportError("An error occurred during import. Please try again.");
+    } finally {
+      setImporting(false);
+    }
+  };
+  
+  // Function for file import
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setImportData(content || '');
+    };
+    reader.readAsText(file);
   };
   
   const handleCreateProduct = async () => {
@@ -155,8 +302,27 @@ export default function ProductsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="mb-8">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl">Product Search</CardTitle>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowImportDialog(true)}
+              className="flex items-center"
+            >
+              <Upload className="h-4 w-4 mr-1" /> Import Products
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportProducts}
+              className="flex items-center"
+              disabled={products.length === 0}
+            >
+              <Download className="h-4 w-4 mr-1" /> Export Products
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex space-x-2">
@@ -325,6 +491,105 @@ export default function ProductsPage() {
                   Creating...
                 </>
               ) : 'Create Product'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Import Products Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Import Products</DialogTitle>
+            <DialogDescription>
+              Import products from a JSON file or paste directly in the format below.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {importError && (
+            <Alert variant="destructive" className="my-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{importError}</AlertDescription>
+            </Alert>
+          )}
+          
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center"
+              >
+                <Upload className="h-4 w-4 mr-1" /> Choose File
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".json"
+                onChange={handleFileImport}
+                className="hidden"
+              />
+              <p className="text-sm text-gray-500">
+                Expected format: [{"{name, sku, price, description}"}]
+              </p>
+            </div>
+            
+            <div className="border rounded-md p-2">
+              <p className="text-sm font-medium mb-2">JSON Data Format Example:</p>
+              <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto">
+{`[
+  {
+    "name": "Product Name",
+    "sku": "123456789",
+    "price": 9.99,
+    "description": "Product description"
+  },
+  {
+    "name": "Another Product",
+    "sku": "987654321",
+    "price": 19.99,
+    "description": "Another description"
+  }
+]`}
+              </pre>
+            </div>
+            
+            <div>
+              <label htmlFor="importData" className="text-sm font-medium">
+                Paste JSON Data:
+              </label>
+              <textarea
+                id="importData"
+                className="mt-1 w-full h-32 p-2 border rounded-md"
+                value={importData}
+                onChange={(e) => setImportData(e.target.value)}
+                placeholder="Paste JSON data here..."
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowImportDialog(false);
+                setImportError(null);
+                setImportData('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleImportProducts}
+              disabled={importing || !importData.trim()}
+            >
+              {importing ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Importing...
+                </>
+              ) : 'Import Products'}
             </Button>
           </DialogFooter>
         </DialogContent>
