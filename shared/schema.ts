@@ -48,7 +48,23 @@ export const insertReceiptItemSchema = createInsertSchema(receiptItems).omit({
   id: true,
 });
 
+// Products table for product information lookup
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  price: numeric("price").notNull(),
+  sku: text("sku").notNull().unique(),
+  description: text("description"),
+  category: text("category"),
+});
+
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+});
+
 export type InsertReceipt = z.infer<typeof insertReceiptSchema>;
 export type Receipt = typeof receipts.$inferSelect;
 export type InsertReceiptItem = z.infer<typeof insertReceiptItemSchema>;
 export type ReceiptItem = typeof receiptItems.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = typeof products.$inferSelect;

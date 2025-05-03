@@ -1,10 +1,11 @@
 import { 
   users, type User, type InsertUser,
   receipts, type Receipt, type InsertReceipt,
-  receiptItems, type ReceiptItem, type InsertReceiptItem
+  receiptItems, type ReceiptItem, type InsertReceiptItem,
+  products, type Product, type InsertProduct
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, ilike, or } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -21,6 +22,15 @@ export interface IStorage {
   createReceiptItem(item: InsertReceiptItem): Promise<ReceiptItem>;
   getReceiptItems(receiptId: number): Promise<ReceiptItem[]>;
   deleteReceiptItem(id: number): Promise<void>;
+  
+  // Product methods
+  createProduct(product: InsertProduct): Promise<Product>;
+  getProduct(id: number): Promise<Product | undefined>;
+  getProductBySku(sku: string): Promise<Product | undefined>;
+  searchProducts(query: string): Promise<Product[]>;
+  getAllProducts(): Promise<Product[]>;
+  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -64,6 +74,51 @@ export class DatabaseStorage implements IStorage {
 
   async deleteReceiptItem(id: number): Promise<void> {
     await db.delete(receiptItems).where(eq(receiptItems.id, id));
+  }
+
+  // Product methods implementation
+  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const result = await db.insert(products).values(insertProduct).returning();
+    return result[0];
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const result = await db.select().from(products).where(eq(products.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async getProductBySku(sku: string): Promise<Product | undefined> {
+    const result = await db.select().from(products).where(eq(products.sku, sku));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async searchProducts(query: string): Promise<Product[]> {
+    return await db.select()
+      .from(products)
+      .where(
+        or(
+          ilike(products.name, `%${query}%`),
+          ilike(products.sku, `%${query}%`),
+          ilike(products.description || '', `%${query}%`)
+        )
+      );
+  }
+
+  async getAllProducts(): Promise<Product[]> {
+    return await db.select().from(products);
+  }
+
+  async updateProduct(id: number, productUpdate: Partial<InsertProduct>): Promise<Product> {
+    const result = await db
+      .update(products)
+      .set(productUpdate)
+      .where(eq(products.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    await db.delete(products).where(eq(products.id, id));
   }
 }
 
