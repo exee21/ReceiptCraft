@@ -38,7 +38,7 @@ const ItemsTable = ({ items, onEditItem, onDeleteItem }: ItemsTableProps) => {
             <TableBody>
               {items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No items added yet
                   </TableCell>
                 </TableRow>
@@ -47,7 +47,9 @@ const ItemsTable = ({ items, onEditItem, onDeleteItem }: ItemsTableProps) => {
                   <TableRow key={index}>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.sku}</TableCell>
+                    <TableCell className="text-right">{item.quantity || 1}</TableCell>
                     <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(item.price * (item.quantity || 1))}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center space-x-2">
                         <Button

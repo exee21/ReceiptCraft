@@ -16,14 +16,15 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
   const receiptRef = useRef<HTMLDivElement>(null);
 
   // Calculate totals
-  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+  const subtotal = items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
   const tax = subtotal * (taxRate / 100);
   const total = subtotal + tax;
   
   // Format item text and create proper spacing
   const formatItemLine = (item: ReceiptItem) => {
-    const itemName = `1 ${item.name}`;
-    const price = formatCurrency(item.price);
+    const qty = item.quantity || 1;
+    const itemName = `${qty} ${item.name}`;
+    const price = formatCurrency(item.price * qty);
     
     // Calculate number of spaces needed (target width is 42 chars)
     const spaces = 42 - itemName.length - price.length;
@@ -98,7 +99,7 @@ const ReceiptPreview = ({ items, receiptInfo, taxRate }: ReceiptPreviewProps) =>
           
           <div className="mb-3">
             <div style={{ fontFamily: 'Courier, monospace' }}>
-              # OF ITEMS SOLD {items.length}    {receiptInfo.date}    {receiptInfo.time}
+              # OF ITEMS SOLD {items.reduce((total, item) => total + (item.quantity || 1), 0)}    {receiptInfo.date}    {receiptInfo.time}
             </div>
           </div>
           
