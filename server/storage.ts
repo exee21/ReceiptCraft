@@ -5,7 +5,7 @@ import {
   products, type Product, type InsertProduct
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, or } from "drizzle-orm";
+import { eq, ilike, or, desc, asc, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -59,8 +59,39 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0 ? result[0] : undefined;
   }
 
-  async getAllReceipts(): Promise<Receipt[]> {
-    return await db.select().from(receipts);
+  async getAllReceipts(filters?: {
+    dateFrom?: string;
+    dateTo?: string;
+    searchTerm?: string;
+  }): Promise<Receipt[]> {
+    let query = db.select().from(receipts);
+    
+    // Apply date filters if provided
+    if (filters?.dateFrom) {
+      query = query.where(eq(receipts.date, filters.dateFrom) || sql`${receipts.date} >= ${filters.dateFrom}`);
+    }
+    
+    if (filters?.dateTo) {
+      query = query.where(eq(receipts.date, filters.dateTo) || sql`${receipts.date} <= ${filters.dateTo}`);
+    }
+    
+    // Apply search term if provided
+    if (filters?.searchTerm) {
+      const term = `%${filters.searchTerm}%`;
+      query = query.where(
+        or(
+          ilike(receipts.helperName, term),
+          ilike(receipts.regNumber, term),
+          ilike(receipts.transNumber, term),
+          ilike(receipts.storeNumber, term)
+        )
+      );
+    }
+    
+    // Order by newest receipts first
+    query = query.orderBy(desc(receipts.date)).orderBy(desc(receipts.time));
+    
+    return await query;
   }
 
   async createReceiptItem(insertItem: InsertReceiptItem): Promise<ReceiptItem> {

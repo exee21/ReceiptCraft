@@ -20,10 +20,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   apiRouter.get("/receipts", async (req, res) => {
     try {
-      const receipts = await storage.getAllReceipts();
+      const { dateFrom, dateTo, search } = req.query;
+      
+      // Build filters object from query parameters
+      const filters: {
+        dateFrom?: string;
+        dateTo?: string;
+        searchTerm?: string;
+      } = {};
+      
+      if (dateFrom && typeof dateFrom === 'string') {
+        filters.dateFrom = dateFrom;
+      }
+      
+      if (dateTo && typeof dateTo === 'string') {
+        filters.dateTo = dateTo;
+      }
+      
+      if (search && typeof search === 'string') {
+        filters.searchTerm = search;
+      }
+      
+      console.log("Receipt filters:", filters);
+      const receipts = await storage.getAllReceipts(
+        Object.keys(filters).length > 0 ? filters : undefined
+      );
       res.json(receipts);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get receipts", error });
+    } catch (error: any) {
+      console.error("Error fetching receipts:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ message: "Failed to get receipts", error: errorMessage });
     }
   });
 
