@@ -46,6 +46,17 @@ export default function Navigation() {
               Product Search
             </Button>
           </Link>
+
+          <Link href="/scanner">
+            <Button 
+              variant={location === '/scanner' ? 'default' : 'outline'} 
+              size="sm"
+              className="flex items-center"
+            >
+              <QrCode className="h-4 w-4 mr-2" />
+              Scanner
+            </Button>
+          </Link>
         </div>
       </div>
     </nav>

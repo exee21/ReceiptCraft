@@ -35,6 +35,34 @@ const Home = () => {
       console.error('Invalid date or time format', error);
     }
   }, [dateInput, timeInput]);
+  
+  // Check for scanned products from scanner page
+  useEffect(() => {
+    const scannedProductString = sessionStorage.getItem('scannedProduct');
+    if (scannedProductString) {
+      try {
+        const scannedProduct = JSON.parse(scannedProductString);
+        // Add the scanned product to the receipt
+        if (scannedProduct && scannedProduct.name && scannedProduct.price) {
+          addItem({
+            name: scannedProduct.name,
+            price: Number(scannedProduct.price),
+            sku: scannedProduct.sku || ''
+          });
+          
+          toast({
+            title: "Scanned Product Added",
+            description: `${scannedProduct.name} added from scanner`,
+          });
+        }
+        
+        // Clear the sessionStorage
+        sessionStorage.removeItem('scannedProduct');
+      } catch (error) {
+        console.error('Error processing scanned product:', error);
+      }
+    }
+  }, []);
 
   const addItem = (item: ReceiptItem) => {
     setItems([...items, item]);
