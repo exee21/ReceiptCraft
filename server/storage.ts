@@ -3,10 +3,10 @@ import {
   receipts, type Receipt, type InsertReceipt,
   receiptItems, type ReceiptItem, type InsertReceiptItem
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
-// modify the interface with any CRUD methods
-// you might need
-
+// Interface for storage operations
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -23,71 +23,48 @@ export interface IStorage {
   deleteReceiptItem(id: number): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private receiptData: Map<number, Receipt>;
-  private receiptItemsData: Map<number, ReceiptItem>;
-  currentId: number;
-  currentReceiptId: number;
-  currentReceiptItemId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.receiptData = new Map();
-    this.receiptItemsData = new Map();
-    this.currentId = 1;
-    this.currentReceiptId = 1;
-    this.currentReceiptItemId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result.length > 0 ? result[0] : undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result.length > 0 ? result[0] : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
   }
 
   async createReceipt(insertReceipt: InsertReceipt): Promise<Receipt> {
-    const id = this.currentReceiptId++;
-    const receipt: Receipt = { ...insertReceipt, id };
-    this.receiptData.set(id, receipt);
-    return receipt;
+    const result = await db.insert(receipts).values(insertReceipt).returning();
+    return result[0];
   }
 
   async getReceipt(id: number): Promise<Receipt | undefined> {
-    return this.receiptData.get(id);
+    const result = await db.select().from(receipts).where(eq(receipts.id, id));
+    return result.length > 0 ? result[0] : undefined;
   }
 
   async getAllReceipts(): Promise<Receipt[]> {
-    return Array.from(this.receiptData.values());
+    return await db.select().from(receipts);
   }
 
   async createReceiptItem(insertItem: InsertReceiptItem): Promise<ReceiptItem> {
-    const id = this.currentReceiptItemId++;
-    const item: ReceiptItem = { ...insertItem, id };
-    this.receiptItemsData.set(id, item);
-    return item;
+    const result = await db.insert(receiptItems).values(insertItem).returning();
+    return result[0];
   }
 
   async getReceiptItems(receiptId: number): Promise<ReceiptItem[]> {
-    return Array.from(this.receiptItemsData.values()).filter(
-      (item) => item.receiptId === receiptId
-    );
+    return await db.select().from(receiptItems).where(eq(receiptItems.receiptId, receiptId));
   }
 
   async deleteReceiptItem(id: number): Promise<void> {
-    this.receiptItemsData.delete(id);
+    await db.delete(receiptItems).where(eq(receiptItems.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
