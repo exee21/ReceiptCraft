@@ -43,4 +43,5 @@ export interface ReceiptInfo {
   randomNumbers: string[];
   date: string;
   time: string;
+  helperName: string;
 }

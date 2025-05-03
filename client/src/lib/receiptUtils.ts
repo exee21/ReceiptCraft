@@ -46,7 +46,7 @@ export const calculateTotals = (items: { price: number }[], taxRate: number) => 
 // Generate random helper information (name and ID)
 export const generateRandomHelperInfo = (): HelperInfo => {
   const nameIndex = Math.floor(Math.random() * americanFemaleNames.length);
-  const name = americanFemaleNames[nameIndex];
+  const name = americanFemaleNames[nameIndex].toUpperCase();
   const id = generateRandomDigits(7);
   return { name, id };
 };
@@ -101,16 +101,21 @@ export const generatePrintHTML = (receiptHTML: string): string => {
       <head>
         <title>CVS Receipt</title>
         <style>
+          @page {
+            margin: 0;
+            size: 80mm 297mm;
+          }
           body { 
-            font-family: monospace; 
+            font-family: 'Courier', monospace; 
             font-size: 12px; 
-            margin: 20px; 
+            margin: 5mm; 
             background-color: white;
+            color: black;
           }
           .receipt { 
-            width: 300px; 
+            width: 70mm; 
             margin: 0 auto; 
-            padding: 10px;
+            padding: 0;
             background-color: white;
           }
           img { max-width: 100%; }
